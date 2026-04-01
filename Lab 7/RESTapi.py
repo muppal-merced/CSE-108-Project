@@ -1,0 +1,136 @@
+#py file: defines what the server does when client calls methods 
+
+from flask import Flask, jsonify, request, render_template
+#jsonify: flask fcn that converts python data into JSON response
+#request: lets flask app access data coming from JS
+#render_template: HTML file can be rendered by the render_template
+
+from flask_sqlalchemy import SQLAlchemy
+#using SQLAlchemy as an ORM to interface 
+#use SQL database instead of JSON file
+
+app = Flask(__name__)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+db = SQLAlchemy(app)
+
+#class that defines a database table model using SQLAlchemy 
+    #creates a table model called Students
+    #db.Model means it inherits from SQLAlchemy's base class
+    #each instance of students = one row in the database
+class Students(db.Model):
+
+    #columns(fields)
+        #must have primary key defined, each student has a unique key
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True, nullable=False)
+    grade = db.Column(db.Integer, unique=False, nullable=False)
+
+    #defins how the opject is displayed when printed
+    def __repr__(self):
+        return f"Student(name = {self.name}, grade = {self.grade})"
+
+#create database tables
+with app.app_context():
+    db.create_all()
+
+@app.route('/') # '/' root of website
+def home():
+    # finds index.html from template folder
+        #sends HTML page to browser
+    return render_template("index.html")
+
+# GET (READ) all students
+@app.route('/students', methods=["GET"])
+def get_students():
+
+    #search for all students in the database
+    students = Students.query.all()
+
+    result = {}
+    for student in students:
+        result[student.name] = student.grade
+
+    return jsonify(result)
+
+# GET (READ) one student
+@app.route('/students/<name>', methods=["GET"])
+def get_student(name):
+
+    #search for oen student using the database
+    student = Students.query.filter_by(name=name).first()
+
+    if student:
+        return jsonify({
+            "name": student.name,
+            "grade": student.grade
+        })
+    return jsonify({"error": "Student not found"}), 404
+
+# POST (CREATE) add student
+@app.route('/students', methods=["POST"])
+def add_student():
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    name = data.get("name")
+    grade = data.get("grade")
+
+    #for blank fields
+    if not name or grade is None:
+        return jsonify({"error": "Missing name or grade"}), 400
+
+    #check if student already exists
+    existing = Students.query.filter_by(name=name).first()
+    if existing:
+        return jsonify({"error": "Student already exists"}), 400
+    
+    new_student = Students(name=name, grade=grade)
+
+    db.session.add(new_student)
+    db.session.commit()
+
+    return jsonify({
+        "name": name,
+        "grade": grade
+    })
+
+# PUT (UPDATE) update grade
+@app.route('/students/<name>', methods=["PUT"])
+def update_student(name):
+
+    student = Students.query.filter_by(name=name).first()
+
+    #student not found
+    if not student:
+        return jsonify({"error": "Student not found"}), 404
+    
+    data = request.get_json()
+    student.grade = data.get("grade")
+
+    db.session.commit()
+
+    return jsonify({
+        "name": student.name,
+        "grade": student.grade
+    })
+
+# DELETE student
+@app.route('/students/<name>', methods=["DELETE"])
+def delete_student(name):
+    
+    student = Students.query.filter_by(name=name).first()
+
+    if not student:
+        return jsonify({"error": "Student not found"}), 404
+    
+    db.session.delete(student)
+    db.session.commit()
+
+    return jsonify({"message": f"{name} deleted"})
+
+# starts flask server, use py RESTapi.py to run
+if __name__ == '__main__':
+    app.run()
