@@ -1,0 +1,98 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 40px;
+}
+
+h1 {
+    text-align: center;
+}
+
+/* Table wrapper and buttons */
+.tableWrap {
+    width: 70%;             
+    margin: 0 auto;         
+}
+
+.listButtons {
+    display: flex;
+    justify-content: flex-end; 
+    margin-bottom: 10px;       
+    gap: 10px;                 
+}
+
+/* Table styling */
+table.Gradebook {
+    border: 1px solid rgb(164, 164, 168);
+    border-collapse: collapse;
+    width: 100%;             
+    min-width: 500px;
+    box-sizing: border-box;  
+    font-size: 18px;
+}
+
+/* Table header */
+th {
+    border: 1px solid rgb(164, 164, 168);
+    padding: 17px 10px;
+    text-align: center;
+    color: #e9eaeb;
+    background-color: rgb(25, 44, 60);
+    box-sizing: border-box;
+}
+
+/* Zebra striping */
+tbody tr:nth-child(even) {
+    background-color: #eef1f2;
+}
+
+/* Hover highlight */
+tbody tr:hover {
+    background-color: #cfd1d4;
+}
+
+/* Cells */
+td {
+    border-right: 1px solid rgb(164, 164, 168);
+    padding: 10px 10px;
+    text-align: left;
+    color: rgb(100, 150, 196);
+    box-sizing: border-box;
+}
+
+td.grade {
+    text-align: right;
+    padding-right: 10px;
+}
+
+/* Remove last border */
+td:last-child {
+    border-right: none;
+}
+
+/* Buttons */
+button {
+    cursor: pointer;
+    padding: 7px 15px;
+}
+
+.tableButtons {
+    cursor: pointer;
+    padding: 7px 15px;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Input */
+input {
+    padding: 7px;
+    text-align: center;
+    margin: auto;
+}
+
+.gradeInput {
+    display: flex;
+    justify-content: center;
+    padding: 7px;
+    text-align: right;
+    margin: auto;
+}

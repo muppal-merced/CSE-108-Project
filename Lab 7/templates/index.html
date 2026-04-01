@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Student Gradebook</title>
+        <!--<link rel="stylesheet" href="style.css">-->
+        <!--for FLASK in static folder-->
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+
+    <body>
+        <h1>Gradebook </h1>
+
+        <h2>Find Student</h2>
+            <input type="text" id="searchName" placeholder="Student Name">
+            <button onclick = "searchStudent()">Search</button>
+
+        <!--divider-->
+        <hr>
+
+        <h2>Add New Student</h2>
+            <input type="text" id="newName" placeholder="Student Name">
+            <input type="number" id="newGrade" placeholder="Grade">
+            <button onclick="addStudent()">Add Student</button>
+
+        <!--divider-->
+        <hr>
+
+        <h2>Student List</h2>
+        <div class = "tableWrap">
+            <div class="listButtons">
+                <button onclick="loadAllStudents()">Refresh List</button>
+                <button onclick="loadAllStudents()">Show All Students</button>
+            </div>
+
+            <!--Table Display-->
+            <table class="Gradebook">
+                <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Grade</th>
+                    <th>Update</th>
+                    <th>Delete</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                    <!--students name/grade will fill in here-->
+                </tbody>
+
+            </table>
+        </div>
+
+        <!--<script src ="script.js"></script>-->
+        <!--for FLASK in static folder-->
+        <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    </body>
+</html>
