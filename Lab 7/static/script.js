@@ -8,8 +8,7 @@ Delete - DELETE
 js file: client(browser) makes the HTTP request, decides how/when to call server
  */
 
-//const url = "https://amhep.pythonanywhere.com/grades"; from lab 5
-const url = "http://127.0.0.1:5000/students";
+const url = "https://friendly-space-eureka-pvww4r5vvrxhrxw7-5000.app.github.dev/students";
 
 
 //load all students
