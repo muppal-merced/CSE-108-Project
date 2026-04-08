@@ -1,11 +1,7 @@
 from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
-from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
 
 app = Flask(__name__)
-
-app.config['SECRET_KEY'] = 'dev-key-change-later'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
@@ -18,9 +14,6 @@ class Students(db.Model):
 
     def __repr__(self):
         return f"Student(name = {self.name}, grade = {self.grade})"
-
-admin = Admin(app, name="ACME Admin")
-admin.add_view(ModelView(Students, db.session))
 
 with app.app_context():
     db.create_all()
