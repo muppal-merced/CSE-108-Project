@@ -10,17 +10,76 @@ app.config['SECRET_KEY'] = 'dev-key-change-later'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 
-class Students(db.Model):
+# class Students(db.Model):
 
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(80), unique=True, nullable=False)
+#     grade = db.Column(db.Integer, unique=False, nullable=False)
+
+#     def __repr__(self):
+#         return f"Student(name = {self.name}, grade = {self.grade})"
+
+#three new classes!
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True, nullable=False)
-    grade = db.Column(db.Integer, unique=False, nullable=False)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    name = db.Column(db.String(120), nullable=False)
+    role = db.Column(db.String(20), nullable=False)
 
     def __repr__(self):
-        return f"Student(name = {self.name}, grade = {self.grade})"
+        return f"{self.name} ({self.role})"
+
+
+class Course(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), nullable=False)
+    time = db.Column(db.String(80), nullable=False)
+    capacity = db.Column(db.Integer, nullable=False)
+
+    teacher_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    teacher = db.relationship('User', backref='courses_taught')
+
+    def __repr__(self):
+        return self.name
+
+
+class Enrollment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    grade = db.Column(db.Integer, nullable=True)
+
+    student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+
+    student = db.relationship('User', backref='enrollments')
+    course = db.relationship('Course', backref='enrollments')
+
+    def __repr__(self):
+        return f"{self.student.name} in {self.course.name}"
+    
+
+# admin = Admin(app, name="ACME Admin")
+# admin.add_view(ModelView(Students, db.session))
+
+class UserAdmin(ModelView):
+    column_list = ['name', 'username', 'role']
+    column_searchable_list = ['name', 'username']
+    column_filters = ['role']
+    form_choices = {'role': [('student', 'Student'), ('teacher', 'Teacher'), ('admin', 'Admin')]}
+
+class CourseAdmin(ModelView):
+    column_list = ['name', 'teacher', 'time', 'capacity']
+    column_searchable_list = ['name']
+
+class EnrollmentAdmin(ModelView):
+    column_list = ['student', 'course', 'grade']
 
 admin = Admin(app, name="ACME Admin")
-admin.add_view(ModelView(Students, db.session))
+admin.add_view(UserAdmin(User, db.session))
+admin.add_view(CourseAdmin(Course, db.session))
+admin.add_view(EnrollmentAdmin(Enrollment, db.session))
+
+
 
 with app.app_context():
     db.create_all()
