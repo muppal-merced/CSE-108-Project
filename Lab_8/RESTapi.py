@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
@@ -93,6 +93,8 @@ def login_page():
 
         if username == 'admin' and password == 'password':
             return render_template("index.html")
+        elif username == 'admin1' and password == 'password123':
+            return redirect('/admin/')
         else:
             return render_template("login.html", error="Invalid credentials")
     return render_template("login.html")
