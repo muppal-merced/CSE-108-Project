@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<h1>ACME University - Student Dashboard</h1>
+
+<button onclick="logout()">Sign Out</button>
+
+<hr>
+
+<h2>Your Courses</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Course</th>
+            <th>Teacher</th>
+            <th>Day/Time</th>
+            <th>Enrolled</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="myCourses"></tbody>
+</table>
+
+<hr>
+
+<h2>All Courses</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Course</th>
+            <th>Teacher</th>
+            <th>Day/Time</th>
+            <th>Enrolled</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="allCourses"></tbody>
+</table>
+
+<script src="{{ url_for('static', filename='student.js') }}"></script>
+
+</body>
+</html>
