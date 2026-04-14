@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, redirect
+from flask import Flask, jsonify, request, render_template, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
@@ -96,9 +96,9 @@ def login_page():
         elif username == 'admin1' and password == 'password123':
             return redirect('/admin/')
         elif username == 'teacher' and password == 'password':
-            return redirect('prof_hp.html')
+            return redirect(url_for('teacher_home'))
         elif username == 'student' and password == 'password':
-            return redirect('student.html')
+            return redirect(url_for('student_home'))
         else:
             return render_template("login.html", error="Invalid credentials")
     return render_template("login.html")
@@ -106,6 +106,16 @@ def login_page():
 @app.route('/index', methods=['GET', 'POST'])
 def home():
     return render_template("index.html")
+
+
+@app.route('/teacher', methods=['GET'])
+def teacher_home():
+    return render_template("prof_hp.html")
+
+
+@app.route('/student', methods=['GET'])
+def student_home():
+    return render_template("student.html")
 
 # GET (READ) all students
 @app.route('/students', methods=["GET"])
