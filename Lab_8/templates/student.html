@@ -8,6 +8,7 @@
 <body>
 
 <h1>ACME University - Student Dashboard</h1>
+<p>Viewing: {{ student_name }}</p>
 
 <button onclick="logout()">Sign Out</button>
 
@@ -21,10 +22,24 @@
             <th>Teacher</th>
             <th>Day/Time</th>
             <th>Enrolled</th>
-            <th>Action</th>
+            <th>Grade</th>
         </tr>
     </thead>
-    <tbody id="myCourses"></tbody>
+    <tbody id="myCourses">
+        {% for course in my_courses %}
+        <tr>
+            <td>{{ course.name }}</td>
+            <td>{{ course.teacher }}</td>
+            <td>{{ course.time }}</td>
+            <td>{{ course.enrolled }}/{{ course.capacity }}</td>
+            <td>{{ course.grade }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5">No enrolled courses found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
 
 <hr>
@@ -37,13 +52,31 @@
             <th>Teacher</th>
             <th>Day/Time</th>
             <th>Enrolled</th>
-            <th>Action</th>
+            <th>Status</th>
         </tr>
     </thead>
-    <tbody id="allCourses"></tbody>
+    <tbody id="allCourses">
+        {% for course in all_courses %}
+        <tr>
+            <td>{{ course.name }}</td>
+            <td>{{ course.teacher }}</td>
+            <td>{{ course.time }}</td>
+            <td>{{ course.enrolled }}/{{ course.capacity }}</td>
+            <td>{% if course.enrolled >= course.capacity %}Full{% else %}Open{% endif %}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5">No courses found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
 
-<script src="{{ url_for('static', filename='student.js') }}"></script>
+<script>
+function logout() {
+    window.location.href = "/";
+}
+</script>
 
 </body>
 </html>

@@ -110,12 +110,57 @@ def home():
 
 @app.route('/teacher', methods=['GET'])
 def teacher_home():
-    return render_template("prof_hp.html")
+    rows = []
+    courses = Course.query.order_by(Course.name).all()
+
+    for course in courses:
+        for enrollment in course.enrollments:
+            rows.append({
+                "course_name": course.name,
+                "teacher_name": course.teacher.name,
+                "student_name": enrollment.student.name,
+                "grade": enrollment.grade
+            })
+
+    return render_template("prof_course.html", rows=rows)
 
 
 @app.route('/student', methods=['GET'])
 def student_home():
-    return render_template("student.html")
+    student_user = User.query.filter_by(role='student').order_by(User.id).first()
+    courses = Course.query.order_by(Course.name).all()
+
+    my_courses = []
+    all_courses = []
+
+    for course in courses:
+        enrolled_count = len(course.enrollments)
+        all_courses.append({
+            "name": course.name,
+            "teacher": course.teacher.name,
+            "time": course.time,
+            "enrolled": enrolled_count,
+            "capacity": course.capacity
+        })
+
+        if student_user is not None:
+            student_enrollment = next((e for e in course.enrollments if e.student_id == student_user.id), None)
+            if student_enrollment is not None:
+                my_courses.append({
+                    "name": course.name,
+                    "teacher": course.teacher.name,
+                    "time": course.time,
+                    "enrolled": enrolled_count,
+                    "capacity": course.capacity,
+                    "grade": student_enrollment.grade
+                })
+
+    return render_template(
+        "student.html",
+        student_name=student_user.name if student_user else "Student",
+        my_courses=my_courses,
+        all_courses=all_courses
+    )
 
 # GET (READ) all students
 @app.route('/students', methods=["GET"])
