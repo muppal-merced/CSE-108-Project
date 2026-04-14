@@ -95,6 +95,10 @@ def login_page():
             return render_template("index.html")
         elif username == 'admin1' and password == 'password123':
             return redirect('/admin/')
+        elif username == 'teacher' and password == 'password':
+            return redirect('prof_hp.html')
+        elif username == 'student' and password == 'password':
+            return redirect('student.html')
         else:
             return render_template("login.html", error="Invalid credentials")
     return render_template("login.html")
