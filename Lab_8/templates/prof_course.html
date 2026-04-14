@@ -8,7 +8,7 @@
     <body>
         <h1>ACME University</h1>
 
-        <h2>Courses Name</h2>
+        <h2>Course Enrollments</h2>
         <div class = "tableWrap">
             <div class="listButtons">
                 <button onclick="">Back</button>
@@ -19,22 +19,31 @@
             <table class="Gradebook">
                 <thead>
                 <tr>
+                    <th>Course</th>
+                    <th>Teacher</th>
                     <th>Student Name</th>
                     <th>Grade</th>
                 </tr>
                 </thead>
 
                 <tbody>
-                    <!--students name/grade will fill in here-->
+                    {% for row in rows %}
+                    <tr>
+                        <td>{{ row.course_name }}</td>
+                        <td>{{ row.teacher_name }}</td>
+                        <td>{{ row.student_name }}</td>
+                        <td>{{ row.grade }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4">No enrollments found.</td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
 
             </table>
         </div>
 
-
-        <!--<script src ="script.js"></script>-->
-        <!--for FLASK in static folder-->
-        <script src="{{ url_for('static', filename='prof_course_script.js') }}"></script>
 
     </body>
 </html>
