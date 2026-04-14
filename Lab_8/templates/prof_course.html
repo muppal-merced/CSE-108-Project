@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Professor Homepage</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+
+    <body>
+        <h1>ACME University</h1>
+
+        <h2>Courses Name</h2>
+        <div class = "tableWrap">
+            <div class="listButtons">
+                <button onclick="">Back</button>
+                <button onclick="">Sign out</button>
+            </div>
+
+            <!--Table Display-->
+            <table class="Gradebook">
+                <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Grade</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                    <!--students name/grade will fill in here-->
+                </tbody>
+
+            </table>
+        </div>
+
+
+        <!--<script src ="script.js"></script>-->
+        <!--for FLASK in static folder-->
+        <script src="{{ url_for('static', filename='prof_course_script.js') }}"></script>
+
+    </body>
+</html>
