@@ -64,6 +64,22 @@ def get_current_teacher():
         teacher_user = User.query.filter_by(username=session['username'], role='teacher').first()
 
     return teacher_user
+
+
+def get_current_student():
+    """Return the logged-in student or None if the session is invalid."""
+    if session.get('role') != 'student':
+        return None
+
+    student_user = None
+
+    if session.get('user_id') is not None:
+        student_user = User.query.filter_by(id=session['user_id'], role='student').first()
+
+    if student_user is None and session.get('username'):
+        student_user = User.query.filter_by(username=session['username'], role='student').first()
+
+    return student_user
     
 
 
@@ -214,16 +230,7 @@ def update_teacher_grade(enrollment_id):
 
 @app.route('/student', methods=['GET'])
 def student_home():
-    if session.get('role') != 'student':
-        return redirect(url_for('login_page'))
-
-    student_user = None
-
-    if session.get('user_id') is not None:
-        student_user = User.query.filter_by(id=session['user_id'], role='student').first()
-
-    if student_user is None and session.get('username'):
-        student_user = User.query.filter_by(username=session['username'], role='student').first()
+    student_user = get_current_student()
 
     if student_user is None:
         session.clear()
@@ -236,25 +243,29 @@ def student_home():
 
     for course in courses:
         enrolled_count = len(course.enrollments)
+        student_enrollment = next((e for e in course.enrollments if e.student_id == student_user.id), None)
+
         all_courses.append({
+            "id": course.id,
             "name": course.name,
             "teacher": course.teacher.name,
             "time": course.time,
             "enrolled": enrolled_count,
-            "capacity": course.capacity
+            "capacity": course.capacity,
+            "is_enrolled": student_enrollment is not None,
+            "is_full": enrolled_count >= course.capacity
         })
 
-        if student_user is not None:
-            student_enrollment = next((e for e in course.enrollments if e.student_id == student_user.id), None)
-            if student_enrollment is not None:
-                my_courses.append({
-                    "name": course.name,
-                    "teacher": course.teacher.name,
-                    "time": course.time,
-                    "enrolled": enrolled_count,
-                    "capacity": course.capacity,
-                    "grade": student_enrollment.grade
-                })
+        if student_enrollment is not None:
+            my_courses.append({
+                "id": course.id,
+                "name": course.name,
+                "teacher": course.teacher.name,
+                "time": course.time,
+                "enrolled": enrolled_count,
+                "capacity": course.capacity,
+                "grade": student_enrollment.grade
+            })
 
     return render_template(
         "student.html",
@@ -262,6 +273,51 @@ def student_home():
         my_courses=my_courses,
         all_courses=all_courses
     )
+
+
+@app.route('/student/enroll/<int:course_id>', methods=['POST'])
+def enroll_course(course_id):
+    student_user = get_current_student()
+
+    if student_user is None:
+        session.clear()
+        return redirect(url_for('login_page'))
+
+    course = Course.query.get(course_id)
+    if course is None:
+        return redirect(url_for('student_home'))
+
+    existing = Enrollment.query.filter_by(student_id=student_user.id, course_id=course.id).first()
+    if existing is not None:
+        return redirect(url_for('student_home'))
+
+    enrolled_count = Enrollment.query.filter_by(course_id=course.id).count()
+    if enrolled_count >= course.capacity:
+        return redirect(url_for('student_home'))
+
+    enrollment = Enrollment(student_id=student_user.id, course_id=course.id, grade=None)
+    db.session.add(enrollment)
+    db.session.commit()
+
+    return redirect(url_for('student_home'))
+
+
+@app.route('/student/drop/<int:course_id>', methods=['POST'])
+def drop_course(course_id):
+    student_user = get_current_student()
+
+    if student_user is None:
+        session.clear()
+        return redirect(url_for('login_page'))
+
+    enrollment = Enrollment.query.filter_by(student_id=student_user.id, course_id=course_id).first()
+    if enrollment is None:
+        return redirect(url_for('student_home'))
+
+    db.session.delete(enrollment)
+    db.session.commit()
+
+    return redirect(url_for('student_home'))
 
 # GET (READ) all students
 @app.route('/students', methods=["GET"])
