@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for
+from flask import Flask, jsonify, request, render_template, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
@@ -10,14 +10,6 @@ app.config['SECRET_KEY'] = 'dev-key-change-later'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 
-# class Students(db.Model):
-
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(80), unique=True, nullable=False)
-#     grade = db.Column(db.Integer, unique=False, nullable=False)
-
-#     def __repr__(self):
-#         return f"Student(name = {self.name}, grade = {self.grade})"
 
 #three new classes!
 class User(db.Model):
@@ -58,8 +50,6 @@ class Enrollment(db.Model):
         return f"{self.student.name} in {self.course.name}"
     
 
-# admin = Admin(app, name="ACME Admin")
-# admin.add_view(ModelView(Students, db.session))
 
 class UserAdmin(ModelView):
     column_list = ['name', 'username', 'role']
@@ -80,7 +70,6 @@ admin.add_view(CourseAdmin(Course, db.session))
 admin.add_view(EnrollmentAdmin(Enrollment, db.session))
 
 
-
 with app.app_context():
     db.create_all()
 
@@ -90,6 +79,22 @@ def login_page():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+
+        user = User.query.filter_by(username=username).first()
+
+        if user and user.password == password:
+            # save who's logged in for other pages to use
+            session['user_id'] = user.id
+            session['username'] = user.username
+            session['role'] = user.role
+
+            # redirect based on role
+            if user.role == 'admin':
+                return redirect('/admin/')
+            elif user.role == 'teacher':
+                return redirect(url_for('teacher_home'))
+            elif user.role == 'student':
+                return redirect(url_for('student_home'))
 
         if username == 'admin' and password == 'password':
             return render_template("index.html")
@@ -101,7 +106,13 @@ def login_page():
             return redirect(url_for('student_home'))
         else:
             return render_template("login.html", error="Invalid credentials")
+        
     return render_template("login.html")
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/')
 
 @app.route('/index', methods=['GET', 'POST'])
 def home():
