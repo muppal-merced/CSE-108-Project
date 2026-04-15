@@ -48,6 +48,22 @@ class Enrollment(db.Model):
 
     def __repr__(self):
         return f"{self.student.name} in {self.course.name}"
+
+
+def get_current_teacher():
+    """Return the logged-in teacher or None if the session is invalid."""
+    if session.get('role') != 'teacher':
+        return None
+
+    teacher_user = None
+
+    if session.get('user_id') is not None:
+        teacher_user = User.query.filter_by(id=session['user_id'], role='teacher').first()
+
+    if teacher_user is None and session.get('username'):
+        teacher_user = User.query.filter_by(username=session['username'], role='teacher').first()
+
+    return teacher_user
     
 
 
@@ -97,12 +113,20 @@ def login_page():
                 return redirect(url_for('student_home'))
 
         if username == 'admin' and password == 'password':
+            session['username'] = username
+            session['role'] = 'admin'
             return render_template("index.html")
         elif username == 'admin1' and password == 'password123':
+            session['username'] = username
+            session['role'] = 'admin'
             return redirect('/admin/')
         elif username == 'teacher' and password == 'password':
+            session['username'] = username
+            session['role'] = 'teacher'
             return redirect(url_for('teacher_home'))
         elif username == 'student' and password == 'password':
+            session['username'] = username
+            session['role'] = 'student'
             return redirect(url_for('student_home'))
         else:
             return render_template("login.html", error="Invalid credentials")
@@ -121,24 +145,90 @@ def home():
 
 @app.route('/teacher', methods=['GET'])
 def teacher_home():
+    teacher_user = get_current_teacher()
+
+    if teacher_user is None:
+        session.clear()
+        return redirect(url_for('login_page'))
+
     rows = []
-    courses = Course.query.order_by(Course.name).all()
+    courses = Course.query.filter_by(teacher_id=teacher_user.id).order_by(Course.name).all()
 
     for course in courses:
+        if not course.enrollments:
+            rows.append({
+                "enrollment_id": None,
+                "course_name": course.name,
+                "teacher_name": teacher_user.name,
+                "student_name": "No students enrolled",
+                "grade": "-"
+            })
+            continue
+
         for enrollment in course.enrollments:
             rows.append({
+                "enrollment_id": enrollment.id,
                 "course_name": course.name,
-                "teacher_name": course.teacher.name,
+                "teacher_name": teacher_user.name,
                 "student_name": enrollment.student.name,
                 "grade": enrollment.grade
             })
 
-    return render_template("prof_course.html", rows=rows)
+    return render_template("prof_hp.html", rows=rows)
+
+
+@app.route('/teacher/grades/<int:enrollment_id>', methods=['POST'])
+def update_teacher_grade(enrollment_id):
+    teacher_user = get_current_teacher()
+
+    if teacher_user is None:
+        session.clear()
+        return redirect(url_for('login_page'))
+
+    enrollment = (
+        Enrollment.query
+        .join(Course)
+        .filter(
+            Enrollment.id == enrollment_id,
+            Course.teacher_id == teacher_user.id
+        )
+        .first()
+    )
+
+    if enrollment is None:
+        return jsonify({"error": "Enrollment not found"}), 404
+
+    grade_value = request.form.get('grade', '').strip()
+
+    if grade_value == '':
+        enrollment.grade = None
+    else:
+        try:
+            enrollment.grade = int(grade_value)
+        except ValueError:
+            return jsonify({"error": "Grade must be a whole number"}), 400
+
+    db.session.commit()
+    return redirect(url_for('teacher_home'))
 
 
 @app.route('/student', methods=['GET'])
 def student_home():
-    student_user = User.query.filter_by(role='student').order_by(User.id).first()
+    if session.get('role') != 'student':
+        return redirect(url_for('login_page'))
+
+    student_user = None
+
+    if session.get('user_id') is not None:
+        student_user = User.query.filter_by(id=session['user_id'], role='student').first()
+
+    if student_user is None and session.get('username'):
+        student_user = User.query.filter_by(username=session['username'], role='student').first()
+
+    if student_user is None:
+        session.clear()
+        return redirect(url_for('login_page'))
+
     courses = Course.query.order_by(Course.name).all()
 
     my_courses = []

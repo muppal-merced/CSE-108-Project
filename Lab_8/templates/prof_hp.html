@@ -8,34 +8,54 @@
     <body>
         <h1>ACME University</h1>
 
-        <h2>Your Courses</h2>
+        <h2>Update Student Grades</h2>
         <div class = "tableWrap">
             <div class="listButtons">
-                <button onclick="">Sign out</button>
+                <form action="{{ url_for('teacher_home') }}" method="get">
+                    <button type="submit">Refresh</button>
+                </form>
+                <form action="{{ url_for('logout') }}" method="get">
+                    <button type="submit">Sign out</button>
+                </form>
             </div>
 
             <!--Table Display-->
             <table class="Gradebook">
                 <thead>
                 <tr>
-                    <th>Course Name</th>
+                    <th>Course</th>
                     <th>Teacher</th>
-                    <th>Time</th>
-                    <th>Students Enrolled</th>
+                    <th>Student</th>
+                    <th>Grade</th>
                 </tr>
                 </thead>
 
                 <tbody>
-                    <!--students name/grade will fill in here-->
+                    {% for row in rows %}
+                    <tr>
+                        <td>{{ row.course_name }}</td>
+                        <td>{{ row.teacher_name }}</td>
+                        <td>{{ row.student_name }}</td>
+                        <td>
+                            {% if row.enrollment_id %}
+                            <form action="{{ url_for('update_teacher_grade', enrollment_id=row.enrollment_id) }}" method="post" class="gradeEditForm">
+                                <input class="gradeInput" type="number" name="grade" value="{{ row.grade if row.grade is not none else '' }}" min="0" max="100">
+                                <button class="tableButtons" type="submit">Save</button>
+                            </form>
+                            {% else %}
+                            {{ row.grade }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center;">No students enrolled in your classes.</td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
 
             </table>
         </div>
-
-
-        <!--<script src ="script.js"></script>-->
-        <!--for FLASK in static folder-->
-        <script src="{{ url_for('static', filename='prof_script.js') }}"></script>
 
     </body>
 </html>

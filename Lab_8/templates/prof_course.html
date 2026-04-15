@@ -11,8 +11,12 @@
         <h2>Course Enrollments</h2>
         <div class = "tableWrap">
             <div class="listButtons">
-                <button onclick="">Back</button>
-                <button onclick="">Sign out</button>
+                <form action="{{ url_for('teacher_home') }}" method="get">
+                    <button type="submit">Back</button>
+                </form>
+                <form action="{{ url_for('logout') }}" method="get">
+                    <button type="submit">Sign out</button>
+                </form>
             </div>
 
             <!--Table Display-->
