@@ -4,7 +4,13 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
-    <p>This is an admin page. Click the navigation to explore.</p>
+<div style="text-align: right; margin-bottom: 20px;">
+    <span>Logged in as <strong>{{ session.get('username', 'admin') }}</strong></span>
+    <a href="/logout" 
+       style="color: white; background: #d9534f; padding: 5px 12px; border-radius: 3px; text-decoration: none; margin-left: 10px;">
+        Sign Out
+    </a>
+</div>
+<p>This is the admin page. Click the navigation to explore.</p>
 {% endblock %}
-
 </html>

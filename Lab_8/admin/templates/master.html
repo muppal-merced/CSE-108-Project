@@ -1,0 +1,14 @@
+{% extends 'admin/base.html' %}
+
+{% block page_body %}
+<div style="position: fixed; top: 8px; right: 20px; z-index: 9999;">
+    <span style="color: #ccc; margin-right: 10px;">
+        Logged in as <strong>{{ session.get('username', 'admin') }}</strong>
+    </span>
+    <a href="/logout" 
+       style="color: white; background: #d9534f; padding: 5px 12px; border-radius: 3px; text-decoration: none; font-size: 13px;">
+        Sign Out
+    </a>
+</div>
+{{ super() }}
+{% endblock %}

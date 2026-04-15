@@ -10,6 +10,22 @@ app.config['SECRET_KEY'] = 'dev-key-change-later'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 
+@app.after_request
+def add_logout_button(response):
+    if request.path.startswith('/admin') and response.content_type.startswith('text/html'):
+        logout_html = '''
+        <div style="position: fixed; top: 8px; right: 20px; z-index: 99999;">
+            <a href="/logout" 
+               style="color: white; background: #d9534f; padding: 6px 14px; border-radius: 4px; text-decoration: none; font-size: 13px;">
+                Sign Out
+            </a>
+        </div>
+        '''
+        response_data = response.get_data(as_text=True)
+        response_data = response_data.replace('</body>', logout_html + '</body>')
+        response.set_data(response_data)
+    return response
+
 
 #three new classes!
 class User(db.Model):
