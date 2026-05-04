@@ -105,12 +105,25 @@ class UserAdmin(ModelView):
     column_filters = ['role']
     form_choices = {'role': [('student', 'Student'), ('teacher', 'Teacher'), ('admin', 'Admin')]}
 
+    form_excluded_columns = ['enrollments']
+
+
 class CourseAdmin(ModelView):
     column_list = ['name', 'teacher', 'time', 'capacity']
     column_searchable_list = ['name']
+    form_args = {
+        'teacher': {
+            'query_factory': lambda: User.query.filter_by(role='teacher')
+        }
+    }
 
 class EnrollmentAdmin(ModelView):
     column_list = ['student', 'course', 'grade']
+    form_args = {
+        'student': {
+            'query_factory': lambda: User.query.filter_by(role='student')
+        }
+    }
 
 admin = Admin(app, name="ACME Admin")
 admin.add_view(UserAdmin(User, db.session))

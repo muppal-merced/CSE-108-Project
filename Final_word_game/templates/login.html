@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wordle Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-page">
+  <main class="login-shell">
+    <section class="login-hero" aria-label="WOR2LE-inspired branding">
+      <p class="eyebrow">Play against your friend</p>
+      <div class="tile-row">
+        <span class="tile green">W</span>
+        <span class="tile yellow">O</span>
+        <span class="tile gray">R</span>
+        <span class="tile green">2</span>
+        <span class="tile yellow">L</span>
+        <span class="tile gray">E</span>
+      </div>
+      <h1>Compete in Wor2le</h1>
+      <p>Sign in to start playing!</p>
+    </section>
+
+    <section class="login-card">
+      <h2>Sign in</h2>
+      <p class="subtitle">A fun way to play WOR2LE against your friends!</p>
+
+      {% if error %}
+      <div class="error-banner" role="alert">{{ error }}</div>
+      {% endif %}
+
+      <form method="post" class="login-form">
+        <label>
+          <span>Username</span>
+          <input type="text" name="username" placeholder="player" autocomplete="username" required>
+        </label>
+
+        <label>
+          <span>Password</span>
+          <input type="password" name="password" placeholder="password" autocomplete="current-password" required>
+        </label>
+
+        <button type="submit">Play</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
