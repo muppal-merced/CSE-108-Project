@@ -263,11 +263,26 @@ body {
   line-height: 1.6;
 }
 
+.lobby-grid {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: minmax(320px, 440px) minmax(420px, 1fr);
+  align-items: start;
+}
+
 .lobby-card {
   padding: 32px;
   display: grid;
-  gap: 22px;
-  align-content: center;
+  gap: 24px;
+  align-content: start;
+  background: rgba(27, 28, 30, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+}
+
+.lobby-panel {
+  display: grid;
+  gap: 24px;
 }
 
 .lobby-block {
@@ -275,12 +290,77 @@ body {
   gap: 14px;
 }
 
+.lobby-notifications {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0 0;
+}
+
+.notification {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(45, 120, 235, 0.14);
+  color: #e5f3ff;
+  border: 1px solid rgba(45, 120, 235, 0.24);
+}
+
+.open-lobbies {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+  background: rgba(27, 28, 30, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+}
+
+@media (max-width: 940px) {
+  .lobby-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lobby-list {
+  display: grid;
+  gap: 16px;
+}
+
+.lobby-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.lobby-row-meta {
+  display: grid;
+  gap: 8px;
+  min-width: 220px;
+}
+
+.lobby-row-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.lobby-status,
+.pending-note {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
 .lobby-form {
   display: grid;
   gap: 12px;
 }
 
-.lobby-form input {
+.lobby-form input,
+.lobby-form select {
   width: 100%;
   border: 1px solid var(--panel-border);
   border-radius: 14px;
@@ -288,6 +368,10 @@ body {
   background: #111213;
   color: var(--text);
   font-size: 1rem;
+}
+
+.lobby-form select {
+  appearance: none;
 }
 
 .lobby-button,
@@ -306,6 +390,26 @@ body {
   text-transform: uppercase;
   text-decoration: none;
   cursor: pointer;
+}
+
+.exit-btn {
+  background: #ff4d4d !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.username {
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
 }
 
 .lobby-divider {
@@ -334,8 +438,19 @@ body {
 }
 
 .game-header {
-  text-align: center;
   margin-bottom: 32px;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.header-title {
+  text-align: left;
 }
 
 .game-header h1 {
@@ -351,18 +466,43 @@ body {
   font-size: 1.1rem;
 }
 
-.players {
+.game-info {
   display: flex;
-  justify-content: center;
-  align-items: center;
   gap: 16px;
-  margin-top: 16px;
-  font-size: 1.2rem;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
-.vs {
-  color: var(--green);
+.round-info, .timer {
+  font-size: 1.1rem;
+  color: var(--muted);
+}
+
+.pause-btn {
+  background: var(--yellow);
+  color: #000;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
   font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.pause-btn:hover {
+  background: #d4b458;
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.score {
+  font-size: 0.9rem;
+  color: var(--muted);
 }
 
 .game-content {
@@ -414,22 +554,146 @@ body {
   margin-left: 8px;
 }
 
-.guess-grid {
-  margin: 24px 0;
-  width: 100%;
-  max-width: 400px;
+.game-main {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 24px;
+  align-items: start;
 }
 
-.guesses {
+.guess-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.guess-grid {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin: 20px 0;
 }
 
-.guess {
+.guess-row {
   display: flex;
   gap: 8px;
   justify-content: center;
+}
+
+.guess-tile {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--panel-border);
+  border-radius: 8px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.guess-tile.green {
+  background: var(--green);
+  color: white;
+  border-color: var(--green);
+}
+
+.guess-tile.yellow {
+  background: var(--yellow);
+  color: white;
+  border-color: var(--yellow);
+}
+
+.guess-tile.gray {
+  background: var(--gray);
+  color: white;
+  border-color: var(--gray);
+}
+
+.chat-section {
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  background: rgba(26, 26, 27, 0.8);
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+  max-height: 320px;
+}
+
+.chat-message {
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.chat-message strong {
+  color: var(--green);
+}
+
+.chat-input {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--panel-border);
+}
+
+.chat-input input {
+  flex: 1;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #111213;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.chat-input button {
+  border: none;
+  background: var(--green);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.paused-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.paused-content {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  max-width: 400px;
+}
+
+.paused-content h2 {
+  margin: 0 0 16px 0;
+  color: var(--text);
+}
+
+.paused-content p {
+  margin: 0 0 24px 0;
+  color: var(--muted);
 }
 
 .guess-input {
@@ -482,4 +746,25 @@ body {
   .vs {
     order: 2;
   }
+
+  .game-info {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .game-main {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .chat-section {
+    height: 250px;
+  }
+
+  .guess-tile {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+}
 }
