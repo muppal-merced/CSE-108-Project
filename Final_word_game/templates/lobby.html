@@ -18,8 +18,8 @@
       <div class="lobby-block">
         <h2>Create Lobby</h2>
         <p>Start a private room and share the code with your opponent.</p>
-        <form class="lobby-form" method="post" action="#">
-          <button type="button" class="lobby-button">Create New Lobby</button>
+        <form class="lobby-form" method="post" action="{{ url_for('create_lobby') }}">
+          <button type="submit" class="lobby-button">Create New Lobby</button>
         </form>
       </div>
 
@@ -27,10 +27,10 @@
 
       <div class="lobby-block">
         <h2>Join Lobby</h2>
-        <p>Enter a room code to join a friend’s match.</p>
-        <form class="lobby-form" method="post" action="#">
+        <p>Enter a room code to join a friend's match.</p>
+        <form class="lobby-form" method="post" action="{{ url_for('join_lobby') }}">
           <input type="text" name="room_code" placeholder="Room code" maxlength="8" required>
-          <button type="button" class="lobby-button">Join Lobby</button>
+          <button type="submit" class="lobby-button">Join Lobby</button>
         </form>
       </div>
 

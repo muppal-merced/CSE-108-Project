@@ -207,21 +207,20 @@ body {
   font-size: 0.95rem;
 }
 
-@media (max-width: 800px) {
-  .login-shell {
-    grid-template-columns: 1fr;
-  }
+.signup-link {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
 
-  .login-hero,
-  .login-card {
-    padding: 28px;
-  }
+.signup-link a {
+  color: var(--green);
+  text-decoration: none;
+}
 
-  .tile {
-    width: 48px;
-    height: 48px;
-    font-size: 1.45rem;
-  }
+.signup-link a:hover {
+  text-decoration: underline;
 }
 
 .lobby-shell {
@@ -321,13 +320,166 @@ body {
   border: 1px solid var(--panel-border);
 }
 
+.game-page {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.game-shell {
+  width: min(1200px, 100%);
+  max-width: 1200px;
+}
+
+.game-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.game-header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.game-header p {
+  margin: 8px 0 0 0;
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+.players {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  font-size: 1.2rem;
+}
+
+.vs {
+  color: var(--green);
+  font-weight: bold;
+}
+
+.game-content {
+  border: 1px solid var(--panel-border);
+  border-radius: 24px;
+  background: rgba(26, 26, 27, 0.94);
+  backdrop-filter: blur(10px);
+  padding: 32px;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.waiting, .word-setting, .gameplay, .game-finished {
+  text-align: center;
+  width: 100%;
+}
+
+.waiting h2, .word-setting h2, .game-finished h2 {
+  margin: 0 0 16px 0;
+}
+
+.word-setting input {
+  width: 200px;
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: #111213;
+  color: var(--text);
+  font-size: 1rem;
+  text-align: center;
+  text-transform: uppercase;
+  margin: 16px 0;
+}
+
+.word-setting button, .guess-input button {
+  border: 0;
+  border-radius: 14px;
+  padding: 14px 18px;
+  background: var(--green);
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.guess-grid {
+  margin: 24px 0;
+  width: 100%;
+  max-width: 400px;
+}
+
+.guesses {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guess {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.guess-input {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.guess-input input {
+  width: 200px;
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: #111213;
+  color: var(--text);
+  font-size: 1rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.game-status {
+  margin-top: 16px;
+  color: var(--muted);
+}
+
+.final-results {
+  margin: 24px 0;
+}
+
+.final-results p {
+  margin: 8px 0;
+  font-size: 1.1rem;
+}
+
 @media (max-width: 800px) {
-  .lobby-shell {
-    grid-template-columns: 1fr;
+  .game-shell {
+    padding: 16px;
   }
 
-  .lobby-hero,
-  .lobby-card {
-    padding: 28px;
+  .game-content {
+    padding: 24px;
+  }
+
+  .players {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .vs {
+    order: 2;
   }
 }
