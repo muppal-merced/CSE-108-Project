@@ -1,0 +1,8 @@
+from flask_socketio import emit, join_room
+from app.extensions import socketio
+
+def register_lobby_events():
+
+    @socketio.on('join_lobby_list')
+    def on_join_lobby_list():
+        join_room('lobby-list')

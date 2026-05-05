@@ -19,21 +19,17 @@ A real-time multiplayer Wordle game built with Flask, SQLAlchemy, and SocketIO.
 5. Winner is the player who guesses correctly in fewer attempts
 6. Points are awarded based on number of attempts (fewer attempts = better score)
 
-## Installation
-
-1. Install dependencies:
-```bash
+## How to Play Locally
+1. Install dependencies
 pip install -r requirements.txt
-```
 
 2. Run the application:
-```bash
-python login.py
-```
+python run.py
 
-3. Open http://127.0.0.1:5000 in your browser
+3. Go to ports table and click the link
 
-## Usage
+## How To Play Online
+go to: wor2le-production.up.railway.app
 
 1. **Sign Up**: Create an account with a username and password
 2. **Login**: Sign in with your credentials
@@ -54,16 +50,36 @@ python login.py
 
 ```
 Final_word_game/
-├── login.py              # Main Flask application
-├── database.py           # Database models and setup
-├── requirements.txt      # Python dependencies
-├── templates/
-│   ├── login.html        # Login page
-│   ├── signup.html       # Registration page
-│   ├── lobby.html        # Lobby selection page
-│   └── game.html         # Game interface
-└── static/
-    └── style.css         # Styling
+│
+├── app/
+│   ├── __init__.py              # creates app (Flask factory, registers routes + sockets)
+│   ├── extensions.py            # shared tools (db + socketio instances)
+│   ├── models.py                # database structure (User, Lobby, Game)
+│
+│   ├── routes/                  # backend logic (HTTP + Socket events)
+│   │   ├── login_signup.py         # login & signup system (HTTP routes)
+│   │   ├── lobby.py                # lobby creation/joining (HTTP routes)
+│   │   ├── game.py                 # game page loading (HTTP routes)
+│   │   ├── socket_connection.py    # socket connection tracking + rooms
+│   │   ├── lobby_events.py         # real-time lobby updates (SocketIO)
+│   │   ├── game_events.py          # core game logic (guessing, scoring, turns)
+│   │   └── chat_events.py          # in-game chat system (SocketIO)
+│
+│   ├── templates/               # frontend HTML pages
+│   │   ├── login.html
+│   │   ├── signup.html
+│   │   ├── lobby.html
+│   │   └── game.html
+│
+│   └── static/                  # frontend styling
+│       └── style.css
+│
+├── config.py                    # app configuration (database, secrets, settings)
+├── run.py                       # entry point (starts Flask + SocketIO server)
+│
+├── instance/                    # database storage (SQLite or local DB files)
+├── requirements.txt             # Python dependencies (libraries needed to run app)
+└── README.md
 ```
 
 ## Database Models
@@ -74,12 +90,12 @@ Final_word_game/
 
 ## Deployment
 
-For production deployment, consider:
-- Using a production WSGI server (Gunicorn, uWSGI)
-- Setting up a proper database (PostgreSQL, MySQL)
+For production deployment:
+- Using a production WSGI server (Gunicorn)
+- Setting up a proper database (PostgreSQL)
 - Configuring environment variables for secrets
 - Setting up HTTPS
-- Hosting on a cloud platform (Heroku, AWS, etc.)
+- Hosting on a cloud platform (Railray)
 
 ## Security Features
 

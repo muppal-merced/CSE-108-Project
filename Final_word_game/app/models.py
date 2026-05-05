@@ -1,16 +1,7 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_socketio import SocketIO
+# defines database structure (tables) of User, Lobby, Game
+
+from .extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
-import os
-
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'wordle-game-secret-key-change-in-production'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///wordle_game.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -64,7 +55,3 @@ class Game(db.Model):
 
     def __repr__(self):
         return f'<Game {self.id} in Lobby {self.lobby.code}>'
-
-# Create database tables
-with app.app_context():
-    db.create_all()
