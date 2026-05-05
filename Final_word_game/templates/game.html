@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wor2le Game</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+</head>
+<body class="game-page">
+  <main class="game-shell">
+    <header class="game-header">
+      <h1>Wor2le Duel</h1>
+      <p>Lobby: {{ lobby.code }}</p>
+      <div class="players">
+        <span class="player">{{ game.player1.username if game and game.player1 else 'Waiting...' }}</span>
+        <span class="vs">vs</span>
+        <span class="player">{{ game.player2.username if game and game.player2 else 'Waiting...' }}</span>
+      </div>
+    </header>
+
+    <div class="game-content" id="gameContent">
+      <!-- Game content will be dynamically updated -->
+      <div class="waiting" id="waitingScreen">
+        <h2>Waiting for players...</h2>
+        <p>Share this code with a friend: <strong>{{ lobby.code }}</strong></p>
+      </div>
+
+      <div class="word-setting" id="wordSettingScreen" style="display: none;">
+        <h2>Set your secret word</h2>
+        <p>Choose a 5-letter word for your opponent to guess.</p>
+        <input type="text" id="wordInput" maxlength="5" placeholder="Enter 5-letter word">
+        <button id="setWordBtn">Set Word</button>
+      </div>
+
+      <div class="gameplay" id="gameplayScreen" style="display: none;">
+        <div class="turn-indicator">
+          <h2 id="turnText">Player 1's turn to guess</h2>
+        </div>
+
+        <div class="guess-grid" id="guessGrid">
+          <!-- Guesses will be displayed here -->
+        </div>
+
+        <div class="guess-input" id="guessInputSection">
+          <input type="text" id="guessInput" maxlength="5" placeholder="Enter your guess">
+          <button id="guessBtn">Guess</button>
+        </div>
+
+        <div class="game-status" id="gameStatus"></div>
+      </div>
+
+      <div class="game-finished" id="finishedScreen" style="display: none;">
+        <h2>Game Finished!</h2>
+        <div id="finalResults"></div>
+        <a href="{{ url_for('lobby') }}" class="lobby-button">Back to Lobby</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const socket = io();
+    const lobbyCode = '{{ lobby.code }}';
+    const username = '{{ username }}';
+    const userId = {{ session.user_id }};
+    const player1Id = {{ game.player1_id if game and game.player1 else 'null' }};
+    const player2Id = {{ game.player2_id if game and game.player2 else 'null' }};
+
+    let currentGameState = '{{ game.status if game else 'waiting' }}';
+    let currentTurn = {{ game.current_turn if game else 1 }};
+    let player1Word = '{{ game.player1_word if game else '' }}';
+    let player2Word = '{{ game.player2_word if game else '' }}';
+
+    socket.emit('join', { room: lobbyCode, username: username });
+
+    // Set word functionality
+    document.getElementById('setWordBtn').addEventListener('click', function() {
+      const word = document.getElementById('wordInput').value.toUpperCase();
+      if (word.length === 5 && /^[A-Z]+$/.test(word)) {
+        socket.emit('set_word', { lobby_code: lobbyCode, word: word });
+        document.getElementById('wordSettingScreen').style.display = 'none';
+      } else {
+        alert('Please enter a valid 5-letter word.');
+      }
+    });
+
+    // Guess functionality
+    document.getElementById('guessBtn').addEventListener('click', function() {
+      const guess = document.getElementById('guessInput').value.toUpperCase();
+      if (guess.length === 5 && /^[A-Z]+$/.test(guess)) {
+        socket.emit('make_guess', { lobby_code: lobbyCode, guess: guess });
+        document.getElementById('guessInput').value = '';
+      } else {
+        alert('Please enter a valid 5-letter guess.');
+      }
+    });
+
+    // Socket event handlers
+    socket.on('lobby_joined', function(data) {
+      location.reload(); // Refresh to update player list
+    });
+
+    socket.on('game_start', function(data) {
+      currentGameState = 'playing';
+      showGameplayScreen();
+    });
+
+    socket.on('guess_result', function(data) {
+      updateGuessGrid(data);
+      currentTurn = data.turn;
+      currentGameState = data.status;
+
+      if (data.result === 'correct' || data.result === 'game_over') {
+        if (currentGameState === 'finished') {
+          showFinishedScreen(data);
+        } else {
+          updateTurnIndicator();
+        }
+      }
+
+      if (data.result === 'wrong') {
+        updateTurnIndicator();
+      }
+    });
+
+    function showGameplayScreen() {
+      document.getElementById('waitingScreen').style.display = 'none';
+      document.getElementById('wordSettingScreen').style.display = 'none';
+      document.getElementById('gameplayScreen').style.display = 'block';
+      updateTurnIndicator();
+    }
+
+    function updateTurnIndicator() {
+      const turnText = document.getElementById('turnText');
+      if (currentTurn === 1) {
+        turnText.textContent = "{{ game.player1.username if game and game.player1 else 'Player 1' }}'s turn to guess {{ game.player2.username if game and game.player2 else 'Player 2' }}'s word";
+      } else {
+        turnText.textContent = "{{ game.player2.username if game and game.player2 else 'Player 2' }}'s turn to guess {{ game.player1.username if game and game.player1 else 'Player 1' }}'s word";
+      }
+
+      // Show/hide guess input based on whose turn it is
+      const guessSection = document.getElementById('guessInputSection');
+      if ((currentTurn === 1 && userId === player1Id) || (currentTurn === 2 && userId === player2Id)) {
+        guessSection.style.display = 'block';
+      } else {
+        guessSection.style.display = 'none';
+      }
+    }
+
+    function updateGuessGrid(data) {
+      const grid = document.getElementById('guessGrid');
+      // This would need more complex logic to display the Wordle-style grid
+      // For now, just show the guesses
+      let html = '<div class="guesses">';
+      data.guesses.forEach(guess => {
+        html += `<div class="guess">${guess}</div>`;
+      });
+      html += '</div>';
+      grid.innerHTML = html;
+    }
+
+    function showFinishedScreen(data) {
+      document.getElementById('gameplayScreen').style.display = 'none';
+      document.getElementById('finishedScreen').style.display = 'block';
+
+      // Calculate winner
+      const results = document.getElementById('finalResults');
+      const player1Score = {{ game.player1_score if game else 0 }};
+      const player2Score = {{ game.player2_score if game else 0 }};
+
+      let winnerText = '';
+      if (player1Score < player2Score) {
+        winnerText = '{{ game.player1.username if game and game.player1 else 'Player 1' }} wins!';
+      } else if (player2Score < player1Score) {
+        winnerText = '{{ game.player2.username if game and game.player2 else 'Player 2' }} wins!';
+      } else {
+        winnerText = "It's a tie!";
+      }
+
+      results.innerHTML = `
+        <p>${winnerText}</p>
+        <p>{{ game.player1.username if game and game.player1 else 'Player 1' }}: ${player1Score} attempts</p>
+        <p>{{ game.player2.username if game and game.player2 else 'Player 2' }}: ${player2Score} attempts</p>
+      `;
+    }
+
+    // Initial screen logic
+    if (currentGameState === 'setting_words') {
+      document.getElementById('waitingScreen').style.display = 'none';
+      document.getElementById('wordSettingScreen').style.display = 'block';
+    } else if (currentGameState === 'playing') {
+      showGameplayScreen();
+    } else if (currentGameState === 'finished') {
+      showFinishedScreen({});
+    }
+  </script>
+</body>
+</html>

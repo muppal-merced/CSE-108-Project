@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wordle Login</title>
+  <title>Wordle Sign Up</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="login-page">
   <main class="login-shell">
     <section class="login-hero" aria-label="WOR2LE-inspired branding">
-      <p class="eyebrow">Play against your friend</p>
+      <p class="eyebrow">Join the game</p>
       <div class="tile-row">
         <span class="tile green">W</span>
         <span class="tile yellow">O</span>
@@ -18,13 +18,13 @@
         <span class="tile yellow">L</span>
         <span class="tile gray">E</span>
       </div>
-      <h1>Compete in Wor2le</h1>
-      <p>Sign in to start playing!</p>
+      <h1>Create your account</h1>
+      <p>Sign up to start competing in Wor2le duels!</p>
     </section>
 
     <section class="login-card">
-      <h2>Sign in</h2>
-      <p class="subtitle">A fun way to play WOR2LE against your friends!</p>
+      <h2>Sign up</h2>
+      <p class="subtitle">Create an account to play Wor2le against friends!</p>
 
       {% if error %}
       <div class="error-banner" role="alert">{{ error }}</div>
@@ -38,13 +38,13 @@
 
         <label>
           <span>Password</span>
-          <input type="password" name="password" placeholder="password" autocomplete="current-password" required>
+          <input type="password" name="password" placeholder="password" autocomplete="new-password" required>
         </label>
 
-        <button type="submit">Play</button>
+        <button type="submit">Create Account</button>
       </form>
 
-      <p class="signup-link">Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a></p>
+      <p class="signup-link">Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>
     </section>
   </main>
 </body>
