@@ -34,6 +34,7 @@ class Lobby(db.Model):
     creator = db.relationship('User', backref='created_lobbies', foreign_keys='Lobby.creator_id')
     player2_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     player2 = db.relationship('User', backref='joined_lobbies', foreign_keys='Lobby.player2_id')
+    word_length = db.Column(db.Integer, default=5)  # Word length for the game
     status = db.Column(db.String(20), default='waiting')  # waiting, active, finished
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
@@ -48,8 +49,9 @@ class Game(db.Model):
     player2_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     player1 = db.relationship('User', backref='games_as_player1', foreign_keys=[player1_id])
     player2 = db.relationship('User', backref='games_as_player2', foreign_keys=[player2_id])
-    player1_word = db.Column(db.String(5), nullable=True)
-    player2_word = db.Column(db.String(5), nullable=True)
+    word_length = db.Column(db.Integer, default=5)  # Word length for the game
+    player1_word = db.Column(db.String(20), nullable=True)  # Increased to support longer words
+    player2_word = db.Column(db.String(20), nullable=True)  # Increased to support longer words
     current_turn = db.Column(db.Integer, default=1)  # 1 for player1 guessing player2's word, 2 for player2 guessing player1's word
     player1_guesses = db.Column(db.Text, default='')  # JSON string of guesses
     player2_guesses = db.Column(db.Text, default='')  # JSON string of guesses
