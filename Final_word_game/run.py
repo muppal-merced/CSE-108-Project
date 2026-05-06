@@ -10,12 +10,9 @@ app = create_app()                               #builds the app
 
 #socketio.init_app(app, async_mode="gevent")     #forces Flask-SocketIO to use gevent properly
 
-#temp delete after
+# checks if db exist/ creates missing ones
 with app.app_context():
-    db.drop_all()
     db.create_all()
-#temp end
-
 
 # for local host
 if __name__ == "__main__":
