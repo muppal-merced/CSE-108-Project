@@ -2,6 +2,8 @@
 
 import os
 from app import create_app, socketio            #app builder, in __init__.py
+from app.extensions import db
+
 
 # for Railway
 app = create_app()                               #builds the app
