@@ -27,10 +27,15 @@ def register_lobby_routes(app):
             return redirect(url_for("login"))
         uid = session["user_id"]
         public_lobbies = Lobby.query.filter_by(status='waiting', lobby_type='public').all()
+        
+        my_lobby = Lobby.query.filter(Lobby.creator_id == uid, Lobby.status.in_(['waiting', 'active'])).first()
+
         return render_template("lobby.html",
                                username=session.get("username"),
                                public_lobbies=public_lobbies,
-                               user_id=uid)
+                               user_id=uid,
+                               my_lobby=my_lobby
+                               )
 
     @app.route("/create_lobby", methods=["POST"])
     def create_lobby():
