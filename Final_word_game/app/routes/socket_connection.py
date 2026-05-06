@@ -15,7 +15,7 @@ disconnect_timers = {}      # user_id: timer object
 
 
 # helps clear lobby list
-def remove_inactive_lobbies(user_id):
+def remove_inactive_lobbies(app, user_id):
     with app.app_context():
         lobbies = Lobby.query.filter(Lobby.creator_id == user_id, Lobby.status.in_(['waiting_public', 'waiting_private', 'request_pending'])).all()
         for lobby in lobbies:
@@ -55,6 +55,7 @@ def register_socket_events():
         user_socket_counts[user_id] = user_socket_counts.get(user_id, 1) - 1
         if user_socket_counts[user_id] <= 0:
             user_socket_counts.pop(user_id, None)
-            timer = Timer(3.0, remove_inactive_lobbies, args=(user_id,))
+            timer = Timer(3.0, remove_inactive_lobbies, args=(socketio.server.app, user_id)
+)
             disconnect_timers[user_id] = timer
             timer.start()
