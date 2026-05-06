@@ -3,70 +3,278 @@
 <head>
   <meta charset="UTF-8">
   <title>Wor2le Game</title>
-
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+  <style>
+    .game-top{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;border-bottom:1px solid #3a3a3c;background:#1a1a1b;}
+    .game-meta{display:flex;gap:20px;align-items:center;justify-content:center;margin:14px 0 4px;font-size:1.1rem;}
+    .player-lbl{font-weight:700;color:#818384;} .player-lbl.me{color:#6aaa64;}
+    .timer-bar{text-align:center;margin-bottom:14px;font-size:1.05rem;color:#d7dadc;}
+    .game-area{display:flex;gap:32px;justify-content:center;align-items:flex-start;flex-wrap:wrap;padding:0 16px 40px;}
+    .grid-wrap{display:flex;flex-direction:column;gap:5px;}
+    .grid-row{display:flex;gap:5px;}
+    .gtile{width:58px;height:58px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:900;border:2px solid #3a3a3c;border-radius:3px;background:#121213;color:#fff;text-transform:uppercase;}
+    .gtile.filled{border-color:#888;}
+    .gtile.correct,.mtile.correct{background:#538d4e!important;border-color:#538d4e!important;}
+    .gtile.present,.mtile.present{background:#b59f3b!important;border-color:#b59f3b!important;}
+    .gtile.absent,.mtile.absent{background:#3a3a3c!important;border-color:#3a3a3c!important;}
+    .mtile{width:28px;height:28px;border:1px solid #3a3a3c;border-radius:3px;background:#121213;}
+    .opp-side{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:6px;}
+    .opp-lbl{font-size:.9rem;color:#818384;font-weight:600;}
+    .kb{display:flex;flex-direction:column;gap:6px;margin-top:16px;align-items:center;}
+    .kb-row{display:flex;gap:5px;}
+    .kbkey{min-width:40px;height:56px;background:#818384;color:#fff;font-weight:700;font-size:.9rem;border:none;border-radius:5px;cursor:pointer;padding:0 8px;text-transform:uppercase;}
+    .kbkey.wide{min-width:64px;font-size:.75rem;}
+    .kbkey.correct{background:#538d4e;}
+    .kbkey.present{background:#b59f3b;}
+    .kbkey.absent{background:#3a3a3c;}
+    .result-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:100;}
+    .result-box{background:#1a1a1b;border:1px solid #3a3a3c;border-radius:14px;padding:36px;max-width:400px;width:90%;text-align:center;}
+    .result-box h2{margin:0 0 12px;} .result-box p{color:#d7dadc;margin:6px 0;}
+    .toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:10px 20px;border-radius:6px;font-weight:700;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;}
+  </style>
 </head>
+<body class="game-page" style="display:block;padding:0;">
 
-<body class="game-page">
-  <main class="game-shell">
+  <div class="game-top">
+    <a href="/lobby" class="logout-link lobby-button" style="padding:7px 14px;font-size:.85rem;">← Back</a>
+    <div class="tile-row" style="gap:4px;">
+      <span class="tile green" style="width:36px;height:36px;font-size:1.1rem;">W</span>
+      <span class="tile yellow" style="width:36px;height:36px;font-size:1.1rem;">O</span>
+      <span class="tile gray" style="width:36px;height:36px;font-size:1.1rem;">R</span>
+      <span class="tile green" style="width:36px;height:36px;font-size:1.1rem;">2</span>
+      <span class="tile yellow" style="width:36px;height:36px;font-size:1.1rem;">L</span>
+      <span class="tile gray" style="width:36px;height:36px;font-size:1.1rem;">E</span>
+    </div>
+    <a href="/logout" class="logout-link lobby-button" style="padding:7px 14px;font-size:.85rem;">Logout</a>
+  </div>
 
-    <!-- UI -->
-    <h1>Wor2le Duel</h1>
+  <div class="game-meta">
+    <span id="p1name" class="player-lbl">...</span>
+    <span style="color:#818384;font-size:.9rem;">vs</span>
+    <span id="p2name" class="player-lbl">...</span>
+  </div>
+  <div class="timer-bar" id="timerDisplay">Timer: 4:00</div>
 
+  <div class="game-area">
+    <!-- MY GRID + KEYBOARD -->
     <div>
-      <p>Lobby: {{ lobby.code }}</p>
-      <p>Playing as: {{ username }}</p>
+      <div id="myGrid" class="grid-wrap"></div>
+      <div class="kb" id="keyboard">
+        <div class="kb-row">
+          {% for k in ['Q','W','E','R','T','Y','U','I','O','P'] %}
+          <button class="kbkey" data-key="{{ k }}">{{ k }}</button>
+          {% endfor %}
+        </div>
+        <div class="kb-row">
+          {% for k in ['A','S','D','F','G','H','J','K','L'] %}
+          <button class="kbkey" data-key="{{ k }}">{{ k }}</button>
+          {% endfor %}
+        </div>
+        <div class="kb-row">
+          <button class="kbkey wide" data-key="ENTER">ENTER</button>
+          {% for k in ['Z','X','C','V','B','N','M'] %}
+          <button class="kbkey" data-key="{{ k }}">{{ k }}</button>
+          {% endfor %}
+          <button class="kbkey wide" data-key="BACKSPACE">⌫</button>
+        </div>
+      </div>
     </div>
 
-    <div>
-      <h3>Your Guesses</h3>
-      <div id="playerGuessGrid"></div>
+    <!-- OPPONENT MINI GRID -->
+    <div class="opp-side">
+      <div class="opp-lbl" id="oppLabel">Opponent</div>
+      <div id="oppGrid" class="grid-wrap"></div>
     </div>
+  </div>
 
-    <div>
-      <h3>Opponent Guesses</h3>
-      <div id="opponentGuessGrid"></div>
+  <!-- RESULT OVERLAY -->
+  <div id="resultOverlay" class="result-overlay" style="display:none;">
+    <div class="result-box">
+      <h2 id="resultTitle"></h2>
+      <p id="resultMsg"></p>
+      <p id="wordReveal" style="font-size:1.2rem;font-weight:700;color:#6aaa64;margin:12px 0;"></p>
+      <a href="/lobby" class="lobby-button" style="display:inline-block;margin-top:12px;">Back to Lobby</a>
     </div>
+  </div>
+  <div class="toast" id="toast"></div>
 
-    <div>
-      <input id="guessInput" type="text" placeholder="Enter guess">
-      <button id="guessBtn">Guess</button>
-    </div>
+  <script>
+    const LOBBY_CODE = {{ lobby.code | tojson }};
+    const GAME_ID    = {{ (game.id if game else 'null') | tojson }};
+    const MY_ID      = {{ user_id | tojson }};
+    const MY_NAME    = {{ username | tojson }};
+    const WORD_LEN   = 5;
+    const MAX_GUESS  = 6;
 
-    <button id="pauseBtn">Pause</button>
+    let currentRow = 0, currentCol = 0, currentGuess = [];
+    let gameActive = false, isP1 = false;
+    let timerInterval = null, timeLeft = 240, timerStarted = false;
 
-  </main>
+    const socket = io();
 
-  <!-- pass data to Flask -->
-<script>
-  window.GAME_CONFIG = {
-    lobbyCode: {{ lobby.code | tojson }},
-    username: {{ username | tojson }},
-    userId: {{ session.user_id | tojson }},
+    // Build grids
+    function buildGrid(id, mini) {
+      const g = document.getElementById(id);
+      g.innerHTML = '';
+      for (let r = 0; r < MAX_GUESS; r++) {
+        const row = document.createElement('div');
+        row.className = 'grid-row';
+        for (let c = 0; c < WORD_LEN; c++) {
+          const t = document.createElement('div');
+          t.className = mini ? 'mtile' : 'gtile';
+          t.id = `${id}-${r}-${c}`;
+          row.appendChild(t);
+        }
+        g.appendChild(row);
+      }
+    }
+    buildGrid('myGrid', false);
+    buildGrid('oppGrid', true);
 
-    player1Id: {{ (game.player1_id if game and game.player1 else none) | tojson }},
-    player2Id: {{ (game.player2_id if game and game.player2 else none) | tojson }},
+    // Timer
+    function startTimer() {
+      if (timerStarted) return;
+      timerStarted = true;
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+        document.getElementById('timerDisplay').textContent = `Timer: ${m}:${String(s).padStart(2,'0')}`;
+        if (timeLeft <= 0) { clearInterval(timerInterval); socket.emit('timer_expired', { game_id: GAME_ID }); }
+      }, 1000);
+    }
 
-    player1Name: {{ (game.player1.username if game and game.player1 else "Player 1") | tojson }},
-    player2Name: {{ (game.player2.username if game and game.player2 else "Player 2") | tojson }},
+    // Socket events
+    socket.on('connect', () => { if (GAME_ID) socket.emit('join_game', { game_id: GAME_ID }); });
 
-    wordLength: {{ (game.word_length if game else 5) | tojson }},
-    gameState: {{ (game.status if game else "waiting") | tojson }},
-    currentTurn: {{ (game.current_turn if game else 1) | tojson }},
+    socket.on('game_state', d => {
+      isP1 = d.is_player1;
+      gameActive = d.status === 'playing';
+      document.getElementById('p1name').textContent = d.player1;
+      document.getElementById('p2name').textContent = d.player2;
+      document.getElementById(isP1 ? 'p1name' : 'p2name').classList.add('me');
+      document.getElementById('oppLabel').textContent = isP1 ? d.player2 : d.player1;
 
-    player1Word: {{ (game.player1_word if game else "") | tojson }},
-    player2Word: {{ (game.player2_word if game else "") | tojson }},
+      (d.my_guesses || []).forEach((row, r) => {
+        row.forEach((t, c) => {
+          const el = document.getElementById(`myGrid-${r}-${c}`);
+          if (el) { el.textContent = t.letter; el.className = `gtile ${t.status}`; }
+        });
+        updateKb(row); currentRow = r + 1;
+      });
+      (d.opp_colors || []).forEach((row, r) => {
+        row.forEach((t, c) => {
+          const el = document.getElementById(`oppGrid-${r}-${c}`);
+          if (el) el.className = `mtile ${t.status}`;
+        });
+      });
+      if (gameActive) startTimer();
+    });
 
-    player1Guesses: {{ (game.player1_guesses if game and game.player1_guesses else []) | tojson }},
-    player2Guesses: {{ (game.player2_guesses if game and game.player2_guesses else []) | tojson }},
+    // Track next opp row
+    let oppNextRow = 0;
+    socket.on('guess_result', d => {
+      const mine = (d.player_id == MY_ID);
+      if (mine) {
+        d.scored_row.forEach((t, c) => {
+          const el = document.getElementById(`myGrid-${currentRow - 1}-${c}`);
+          if (el) { el.textContent = t.letter; el.className = `gtile ${t.status}`; }
+        });
+        updateKb(d.scored_row);
+        currentGuess = []; currentCol = 0;
+      } else {
+        d.opp_color_row.forEach((t, c) => {
+          const el = document.getElementById(`oppGrid-${oppNextRow}-${c}`);
+          if (el) el.className = `mtile ${t.status}`;
+        });
+        oppNextRow++;
+      }
+      if (d.game_over) { clearInterval(timerInterval); gameActive = false; showResult(d); }
+    });
 
-    player1Score: {{ (game.player1_score if game else 0) | tojson }},
-    player2Score: {{ (game.player2_score if game else 0) | tojson }}
-  };
-</script>
+    socket.on('game_over', d => { clearInterval(timerInterval); gameActive = false; showResult(d); });
 
-  <!-- load JS-->
-  <script src="{{ url_for('static', filename='game.js') }}"></script>
+    socket.on('opponent_disconnected', d => {
+      clearInterval(timerInterval); gameActive = false;
+      document.getElementById('resultTitle').textContent = '😔 Opponent Disconnected';
+      document.getElementById('resultMsg').textContent = d.msg;
+      document.getElementById('wordReveal').textContent = '';
+      document.getElementById('resultOverlay').style.display = 'flex';
+    });
+
+    socket.on('error', d => toast(d.msg));
+
+    function showResult(d) {
+      const msgs = {
+        both_win:    ['🎉 Tie — Both Win!', 'You both guessed it!'],
+        player1_wins:[isP1 ? '🏆 You Win!' : 'Opponent Wins', isP1 ? 'You guessed first!' : 'Better luck next time.'],
+        player2_wins:[!isP1 ? '🏆 You Win!' : 'Opponent Wins', !isP1 ? 'You guessed first!' : 'Better luck next time.'],
+        both_lose:   ['😞 Both Lose', 'Neither player guessed the word.'],
+        time_up:     ['⏰ Time\'s Up — Both Lose', 'The timer ran out.'],
+      };
+      const [title, msg] = msgs[d.result] || ['Game Over', ''];
+      document.getElementById('resultTitle').textContent = title;
+      document.getElementById('resultMsg').textContent = msg;
+      if (d.secret_word) document.getElementById('wordReveal').textContent = `The word was: ${d.secret_word}`;
+      document.getElementById('resultOverlay').style.display = 'flex';
+    }
+
+    // Keyboard
+    function updateKb(row) {
+      const p = { correct: 3, present: 2, absent: 1 };
+      row.forEach(t => {
+        const btn = document.querySelector(`.kbkey[data-key="${t.letter}"]`);
+        if (!btn) return;
+        if ((p[t.status] || 0) > (p[btn.dataset.status] || 0)) {
+          btn.dataset.status = t.status;
+          btn.className = `kbkey${btn.classList.contains('wide') ? ' wide' : ''} ${t.status}`;
+        }
+      });
+    }
+    function typeLetter(l) {
+      if (!gameActive || currentCol >= WORD_LEN) return;
+      currentGuess.push(l);
+      const el = document.getElementById(`myGrid-${currentRow}-${currentCol}`);
+      if (el) { el.textContent = l; el.classList.add('filled'); }
+      currentCol++;
+    }
+    function deleteLetter() {
+      if (!gameActive || currentCol <= 0) return;
+      currentCol--; currentGuess.pop();
+      const el = document.getElementById(`myGrid-${currentRow}-${currentCol}`);
+      if (el) { el.textContent = ''; el.classList.remove('filled'); }
+    }
+    function submitGuess() {
+      if (!gameActive) return;
+      if (currentGuess.length !== WORD_LEN) { toast(`Need ${WORD_LEN} letters`); return; }
+      currentRow++;
+      socket.emit('submit_guess', { game_id: GAME_ID, guess: currentGuess.join('') });
+    }
+
+    document.addEventListener('keydown', e => {
+      if (!gameActive) return;
+      if (e.key === 'Enter') { submitGuess(); return; }
+      if (e.key === 'Backspace') { deleteLetter(); return; }
+      if (/^[a-zA-Z]$/.test(e.key)) typeLetter(e.key.toUpperCase());
+    });
+    document.getElementById('keyboard').addEventListener('click', e => {
+      const btn = e.target.closest('.kbkey');
+      if (!btn) return;
+      const k = btn.dataset.key;
+      if (k === 'ENTER') submitGuess();
+      else if (k === 'BACKSPACE') deleteLetter();
+      else typeLetter(k);
+    });
+
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.style.opacity = '1';
+      setTimeout(() => t.style.opacity = '0', 2000);
+    }
+
+    window.addEventListener('beforeunload', () => {
+      if (gameActive) socket.emit('player_disconnected_game', { game_id: GAME_ID, username: MY_NAME });
+    });
+  </script>
 </body>
 </html>

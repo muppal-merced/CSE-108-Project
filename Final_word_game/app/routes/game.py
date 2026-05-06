@@ -32,4 +32,6 @@ def register_game_routes(app):
             flash("The game is not ready yet.")
             return redirect(url_for("lobby"))
 
-        return render_template("game.html", lobby=lobby, game=game, username=session["username"])
+        return render_template("game.html", lobby=lobby, game=game,
+                       username=session["username"],
+                       user_id=session["user_id"])
