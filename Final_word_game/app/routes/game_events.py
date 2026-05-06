@@ -1,9 +1,19 @@
 from app.extensions import socketio, db
 from app.models import Lobby, Game
 from flask import session
+from app.models import Lobby, Game
+from flask_socketio import emit, join_room
+
 import json
 
 def register_game_events():
+
+    @socketio.on('join')
+    def handle_join(data):
+        room = data['room']
+        username = data['username']
+        join_room(room)
+        emit('message', {'msg': f'{username} joined'}, room=room)
 
     @socketio.on('set_word')
     def on_set_word(data):
