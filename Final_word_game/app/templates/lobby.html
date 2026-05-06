@@ -8,176 +8,131 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
 </head>
 <body class="lobby-page">
-  <main class="lobby-shell">
-    <section class="lobby-hero">
+
+  <!-- HOW TO PLAY MODAL -->
+  <div id="howToPlayModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:center;justify-content:center;">
+    <div style="background:#1a1a1b;border:1px solid #3a3a3c;border-radius:20px;padding:36px;max-width:460px;width:90%;">
+      <h2 style="margin:0 0 16px">How to Play</h2>
+      <ul style="color:#d7dadc;line-height:1.9;padding-left:18px;">
+        <li>Both players guess the <strong>same secret 5-letter word</strong>.</li>
+        <li>You have <strong>6 attempts</strong> and <strong>4 minutes</strong>.</li>
+        <li>After each guess, tiles show:
+          <br><span style="background:#6aaa64;padding:2px 8px;border-radius:4px;font-weight:bold;">Green</span> = right letter, right spot
+          <br><span style="background:#c9b458;padding:2px 8px;border-radius:4px;font-weight:bold;">Yellow</span> = right letter, wrong spot
+          <br><span style="background:#353535;padding:2px 8px;border-radius:4px;font-weight:bold;">Gray</span> = not in word
+        </li>
+        <li>You see your opponent's <strong>colors only</strong>, not their letters.</li>
+        <li><strong>Winner:</strong> First to guess correctly.</li>
+        <li><strong>Both win:</strong> Both solve it on the same submit.</li>
+        <li><strong>Both lose:</strong> Time runs out or both run out of guesses.</li>
+        <li>If opponent disconnects, you'll see a notification.</li>
+      </ul>
+      <button onclick="document.getElementById('howToPlayModal').style.display='none'" class="lobby-button" style="width:100%">Got it!</button>
+    </div>
+  </div>
+
+  <main class="lobby-shell" style="display:block;max-width:860px;margin:0 auto;padding:24px;">
+
+    <!-- HEADER -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:12px;">
+      <div class="tile-row" style="gap:6px;">
+        <span class="tile green">W</span><span class="tile yellow">O</span><span class="tile gray">R</span>
+        <span class="tile green">2</span><span class="tile yellow">L</span><span class="tile gray">E</span>
+      </div>
       <div class="header-actions">
-        <span class="username-display">Signed in as {{ username }}</span>
-        <a class="logout-link" href="{{ url_for('logout') }}">Logout</a>
+        <span class="username-display">{{ username }}</span>
+        <button onclick="document.getElementById('howToPlayModal').style.display='flex'" class="lobby-button" style="background:#353535;">? How to Play</button>
+        <a class="logout-link lobby-button" href="{{ url_for('logout') }}">Logout</a>
       </div>
-      <h1>Create or join a lobby</h1>
-      <p>Invite or join another player and start your 1v1 Wor2le match.</p>
-    </section>
+    </div>
 
-    <div id="lobbyNotifications" class="lobby-notifications"></div>
+    <div id="flashMsg" style="display:none;padding:12px 16px;border-radius:12px;background:rgba(202,84,84,.16);border:1px solid rgba(202,84,84,.4);color:#ffd7d7;margin-bottom:16px;"></div>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div style="padding:12px 16px;border-radius:12px;background:rgba(202,84,84,.16);border:1px solid rgba(202,84,84,.4);color:#ffd7d7;margin-bottom:16px;">{{ messages[0] }}</div>
+      {% endif %}
+    {% endwith %}
 
-    <section class="lobby-grid">
-      <div class="lobby-card">
-        <div class="lobby-block">
-          <h2>Create Lobby</h2>
-          <p>Start a room and choose whether it is open to anyone or private access only.</p>
-          <form class="lobby-form" method="post" action="{{ url_for('create_lobby') }}">
-            <label for="visibility">Lobby type</label>
-            <select name="visibility" id="visibility">
-              <option value="public">Public - anyone can join immediately</option>
-              <option value="private">Private - owner must approve requests</option>
-            </select>
-            <button type="submit" class="lobby-button">Create Lobby</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+
+      <!-- CREATE LOBBY -->
+      <div class="open-lobbies">
+        <h2>Create a Lobby</h2>
+        <form method="post" action="{{ url_for('create_lobby') }}" class="lobby-form">
+          <input type="text" name="name" placeholder="Lobby name (optional)" maxlength="40">
+          <select name="visibility">
+            <option value="public">🌐 Public — anyone can join</option>
+            <option value="private">🔒 Private (Demo) — word is LEMON</option>
+          </select>
+          <button type="submit" class="lobby-button">Create Lobby</button>
+        </form>
+        {% set my_lobby = public_lobbies | selectattr('creator_id', 'equalto', user_id) | first | default(none) %}
+        {% if my_lobby %}
+        <div style="margin-top:12px;padding:10px 14px;border:1px solid #6aaa64;border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
+          <span>Your lobby: <strong>{{ my_lobby.code }}</strong> — waiting...</span>
+          <form method="post" action="{{ url_for('delete_lobby', lobby_code=my_lobby.code) }}" style="margin:0;">
+            <button type="submit" class="lobby-button" style="background:#8b3333;padding:8px 14px;">🗑 Delete</button>
           </form>
-        </div>
-
-        <div class="lobby-block">
-          <h2>Join by Code</h2>
-          <p>Already have a room code? Enter it here to join directly.</p>
-          <form class="lobby-form" method="post" action="{{ url_for('join_lobby') }}">
-            <input type="text" name="room_code" placeholder="Room code" maxlength="8" required>
-            <button type="submit" class="lobby-button">Join Lobby</button>
-          </form>
-          {% if pending_lobby %}
-          <div class="pending-note">
-            Request pending for lobby <strong>{{ pending_lobby.code }}</strong>. Please wait for approval.
-          </div>
-          {% endif %}
-        </div>
-      </div>
-
-      <div class="lobby-panel">
-        <div class="open-lobbies">
-          <h2>Public Lobbies</h2>
-          {% if public_lobbies %}
-            <div class="lobby-list">
-              {% for lobby_item in public_lobbies %}
-                <div class="lobby-row">
-                  <div class="lobby-row-meta">
-                    <div><strong>Code:</strong> {{ lobby_item.code }}</div>
-                    <div><strong>Host:</strong> {{ lobby_item.creator.username }}</div>
-                    <div><strong>Players:</strong> 1 / 2</div>
-                    <div><strong>Status:</strong> Open to join</div>
-                  </div>
-                  <div class="lobby-row-actions">
-                    {% if lobby_item.creator_id != user_id %}
-                      <form method="post" action="{{ url_for('join_lobby') }}">
-                        <input type="hidden" name="room_code" value="{{ lobby_item.code }}">
-                        <button type="submit" class="lobby-button">Join Now</button>
-                      </form>
-                    {% else %}
-                      <span class="lobby-status">Your lobby</span>
-                    {% endif %}
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
-          {% else %}
-            <p class="muted">No active public lobbies right now.</p>
-          {% endif %}
-        </div>
-
-        <div class="open-lobbies">
-          <h2>Private Lobbies</h2>
-          <div class="lobby-row">
-            <div class="lobby-row-meta">
-              <div><strong>Active private lobbies:</strong> {{ private_lobby_count }}</div>
-              <div><strong>Join method:</strong> enter code above to request access</div>
-            </div>
-          </div>
-        </div>
-
-        {% if active_created_lobbies %}
-        <div class="open-lobbies active-games-panel">
-          <h2>Your Active Games</h2>
-          <div class="lobby-list">
-            {% for lobby_item in active_created_lobbies %}
-              <div class="lobby-row">
-                <div class="lobby-row-meta">
-                  <div><strong>Code:</strong> {{ lobby_item.code }}</div>
-                  <div><strong>Opponent:</strong> {{ lobby_item.player2.username }}</div>
-                  <div><strong>Status:</strong> 
-                    {% if lobby_item.status == 'selecting_words' %}Setting words{% elif lobby_item.status == 'playing' %}In progress{% else %}Finished{% endif %}
-                  </div>
-                </div>
-                <div class="lobby-row-actions">
-                  <a href="{{ url_for('game', lobby_code=lobby_item.code) }}" class="lobby-button">Enter Game</a>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% endif %}
-
-        {% if pending_requests %}
-        <div class="open-lobbies pending-panel">
-          <h2>Pending Requests</h2>
-          <div class="lobby-list">
-            {% for request_lobby in pending_requests %}
-              <div class="lobby-row">
-                <div class="lobby-row-meta">
-                  <div><strong>Lobby:</strong> {{ request_lobby.code }}</div>
-                  <div><strong>Requester:</strong> {{ request_lobby.player2.username }}</div>
-                  <div><strong>Type:</strong> Private</div>
-                </div>
-                <div class="lobby-row-actions">
-                  <form method="post" action="{{ url_for('approve_join', lobby_code=request_lobby.code) }}">
-                    <button type="submit" class="lobby-button">Accept</button>
-                  </form>
-                  <form method="post" action="{{ url_for('reject_join', lobby_code=request_lobby.code) }}">
-                    <button type="submit" class="logout-link">Reject</button>
-                  </form>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
         </div>
         {% endif %}
       </div>
-    </section>
+
+      <!-- JOIN BY CODE -->
+      <div class="open-lobbies">
+        <h2>Join by Code</h2>
+        <form method="post" action="{{ url_for('join_lobby') }}" class="lobby-form">
+          <input type="text" name="room_code" placeholder="Enter lobby code" maxlength="6" style="text-transform:uppercase">
+          <button type="submit" class="lobby-button">Join Lobby</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- PUBLIC LOBBIES LIST -->
+    <div class="open-lobbies">
+      <h2>Public Lobbies</h2>
+      {% if public_lobbies %}
+        <div class="lobby-list">
+          {% for lb in public_lobbies %}
+            {% if lb.creator_id != user_id %}
+            <div class="lobby-row">
+              <div class="lobby-row-meta">
+                <div><strong>{{ lb.name or lb.code }}</strong></div>
+                <div>Code: <span style="color:#c9b458;font-family:monospace">{{ lb.code }}</span></div>
+                <div>Host: {{ lb.creator.username }}</div>
+              </div>
+              <div class="lobby-row-actions">
+                <form method="post" action="{{ url_for('join_lobby') }}">
+                  <input type="hidden" name="room_code" value="{{ lb.code }}">
+                  <button type="submit" class="lobby-button">Join</button>
+                </form>
+              </div>
+            </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">No public lobbies right now.</p>
+      {% endif %}
+    </div>
+
   </main>
 
   <script>
     const socket = io();
-    const currentUserId = {{ user_id }};
-    const lobbyNotifications = document.getElementById('lobbyNotifications');
-
-    socket.emit('register_user', { user_id: currentUserId });
+    socket.emit('register_user', { user_id: {{ user_id }} });
     socket.emit('join_lobby_list');
 
-    function showLobbyNotification(message) {
-      const notification = document.createElement('div');
-      notification.className = 'notification';
-      notification.textContent = message;
-      lobbyNotifications.appendChild(notification);
-      setTimeout(() => {
-        notification.remove();
-      }, 9000);
-    }
+    // If host is waiting, join their lobby room to hear game_starting
+    {% set my_lobby = public_lobbies | selectattr('creator_id', 'equalto', user_id) | first | default(none) %}
+    {% if my_lobby %}
+    socket.emit('join_lobby_room', { code: '{{ my_lobby.code }}' });
+    {% endif %}
 
-    socket.on('join_request', function(data) {
-      showLobbyNotification(`New join request for lobby ${data.lobby_code} from ${data.requester}. Refresh to approve.`);
+    socket.on('game_starting', function(data) {
+      window.location.href = '/game/' + data.lobby_code;
     });
 
-    socket.on('join_request_response', function(data) {
-      if (data.status === 'accepted') {
-        showLobbyNotification(`Your request to join ${data.lobby_code} was accepted. Redirecting...`);
-        setTimeout(() => {
-          window.location.href = `/game/${data.lobby_code}`;
-        }, 1200);
-      } else if (data.status === 'rejected') {
-        showLobbyNotification(`Your request to join ${data.lobby_code} was rejected.`);
-        setTimeout(() => {
-          window.location.reload();
-        }, 1200);
-      }
-    });
-
-    socket.on('lobby_update', function(data) {
+    socket.on('lobby_list_changed', function() {
       window.location.reload();
     });
   </script>

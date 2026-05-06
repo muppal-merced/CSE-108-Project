@@ -1,5 +1,3 @@
-# defines database structure (tables) of User, Lobby, Game
-
 from .extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -21,11 +19,12 @@ class User(db.Model):
 class Lobby(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(8), unique=True, nullable=False)
+    name = db.Column(db.String(80), default='')
+    lobby_type = db.Column(db.String(10), default='public')  # 'public' or 'private'
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     creator = db.relationship('User', backref='created_lobbies', foreign_keys='Lobby.creator_id')
     player2_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     player2 = db.relationship('User', backref='joined_lobbies', foreign_keys='Lobby.player2_id')
-    word_length = db.Column(db.Integer, default=5)  # Word length for the game
     status = db.Column(db.String(20), default='waiting')  # waiting, active, finished
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
@@ -40,15 +39,12 @@ class Game(db.Model):
     player2_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     player1 = db.relationship('User', backref='games_as_player1', foreign_keys=[player1_id])
     player2 = db.relationship('User', backref='games_as_player2', foreign_keys=[player2_id])
-    word_length = db.Column(db.Integer, default=5)  # Word length for the game
-    player1_word = db.Column(db.String(20), nullable=True)  # Increased to support longer words
-    player2_word = db.Column(db.String(20), nullable=True)  # Increased to support longer words
-    current_turn = db.Column(db.Integer, default=1)  # 1 for player1 guessing player2's word, 2 for player2 guessing player1's word
-    player1_guesses = db.Column(db.Text, default='')  # JSON string of guesses
-    player2_guesses = db.Column(db.Text, default='')  # JSON string of guesses
-    player1_score = db.Column(db.Integer, default=0)
-    player2_score = db.Column(db.Integer, default=0)
-    status = db.Column(db.String(20), default='setting_words')  # setting_words, playing, finished
+    secret_word = db.Column(db.String(10), nullable=False)      # shared word both players guess
+    player1_guesses = db.Column(db.Text, default='')            # JSON list
+    player2_guesses = db.Column(db.Text, default='')
+    player1_solved = db.Column(db.Boolean, default=False)
+    player2_solved = db.Column(db.Boolean, default=False)
+    status = db.Column(db.String(20), default='playing')        # playing, finished
     winner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     winner = db.relationship('User', backref='won_games', foreign_keys=[winner_id])
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
