@@ -63,18 +63,26 @@ def register_lobby_routes(app):
 
     @app.route("/delete_lobby/<lobby_code>", methods=["POST"])
     def delete_lobby(lobby_code):
+
         if not session.get("logged_in"):
             return redirect(url_for("login"))
+
         uid = session["user_id"]
         lobby = Lobby.query.filter_by(code=lobby_code).first()
+
         if not lobby or lobby.creator_id != uid:
             flash("Cannot delete that lobby.")
             return redirect(url_for("lobby"))
-        if lobby.status == 'active':
-            flash("Cannot delete an active game.")
-            return redirect(url_for("lobby"))
+
+        # delete related game first
+        game = Game.query.filter_by(lobby_id=lobby.id).first()
+        if game:
+            db.session.delete(game)
+
+        # now delete lobby
         db.session.delete(lobby)
         db.session.commit()
+
         socketio.emit('lobby_list_changed', {}, room='lobby-list')
         return redirect(url_for("lobby"))
 
