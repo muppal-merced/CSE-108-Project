@@ -1,14 +1,20 @@
+# handles game page
+
 from flask import render_template, session, redirect, url_for, flash
 from app.models import Lobby, Game
 
+# HTTP route that protects and loads game page
+
 def register_game_routes(app):
 
-    @app.route("/game/<lobby_code>")
-    def game(lobby_code):
-        if not session.get("logged_in"):
+    @app.route("/game/<lobby_code>")           # goes to game w/lobby code
+    def game(lobby_code):     
+                                                  
+        if not session.get("logged_in"):            # check user logged in  
             return redirect(url_for("login"))
 
-        lobby = Lobby.query.filter_by(code=lobby_code).first()
+        lobby = Lobby.query.filter_by(code=lobby_code).first()      # find lobby w/code
+        
         if not lobby:
             flash("Lobby not found.")
             return redirect(url_for("lobby"))

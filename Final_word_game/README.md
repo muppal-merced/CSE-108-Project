@@ -29,7 +29,7 @@ python run.py
 3. Go to ports table and click the link
 
 ## How To Play Online
-go to: wor2le-production.up.railway.app
+go to: wordle-test-production-46f0.up.railway.app
 
 1. **Sign Up**: Create an account with a username and password
 2. **Login**: Sign in with your credentials
