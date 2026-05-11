@@ -127,6 +127,14 @@ def register_game_events():
             'player2_id': game.player2_id,
         }, room=f'game_{game_id}')
 
+    @socketio.on('get_wordbank')
+    def on_get_wordbank():
+        try:
+            words = list(_get_wordbank())
+        except Exception:
+            words = []
+        emit('wordbank', {'words': words})
+
     @socketio.on('timer_expired')
     def on_timer_expired(data):
         game = Game.query.get(data.get('game_id'))
