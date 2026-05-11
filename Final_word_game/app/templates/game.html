@@ -176,6 +176,7 @@
     socket.on('guess_result', d => {
       const mine = (d.player_id == MY_ID);
       if (mine) {
+        currentRow++;
         d.scored_row.forEach((t, c) => {
           const el = document.getElementById(`myGrid-${currentRow - 1}-${c}`);
           if (el) { el.textContent = t.letter; el.className = `gtile ${t.status}`; }
@@ -247,7 +248,6 @@
     function submitGuess() {
       if (!gameActive) return;
       if (currentGuess.length !== WORD_LEN) { toast(`Need ${WORD_LEN} letters`); return; }
-      currentRow++;
       socket.emit('submit_guess', { game_id: GAME_ID, guess: currentGuess.join('') });
     }
 
