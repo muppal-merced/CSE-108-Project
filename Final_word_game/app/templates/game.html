@@ -146,10 +146,6 @@
 
     // Socket events
     socket.on('connect', () => { if (GAME_ID) socket.emit('join_game', { game_id: GAME_ID }); });
-    // fetch allowed words from server
-    let wordBank = new Set();
-    socket.on('wordbank', d => { wordBank = new Set((d.words || []).map(w => w.toUpperCase())); });
-    socket.on('connect', () => { socket.emit('get_wordbank'); if (GAME_ID) socket.emit('join_game', { game_id: GAME_ID }); });
 
     socket.on('game_state', d => {
       isP1 = d.is_player1;
@@ -251,9 +247,8 @@
     function submitGuess() {
       if (!gameActive) return;
       if (currentGuess.length !== WORD_LEN) { toast(`Need ${WORD_LEN} letters`); return; }
-      const guessStr = currentGuess.join('');
-      if (wordBank.size && !wordBank.has(guessStr)) { toast('Not in word list'); return; }
-      socket.emit('submit_guess', { game_id: GAME_ID, guess: guessStr });
+      currentRow++;
+      socket.emit('submit_guess', { game_id: GAME_ID, guess: currentGuess.join('') });
     }
 
     document.addEventListener('keydown', e => {
