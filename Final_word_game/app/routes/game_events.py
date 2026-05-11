@@ -15,6 +15,18 @@ def _get_wordbank():
             if w.strip() and len(w.strip()) == 5
         }
 
+def _get_valid_guesses(): #used for validating user guesses — bigger list including plurals/past tense.
+    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    valid = set()
+    # allow anything in the answers list
+    with open(os.path.join(base, 'data', 'answers.txt')) as f:
+        valid.update(w.strip().upper() for w in f if w.strip() and len(w.strip()) == 5)
+    guesses_path = os.path.join(base, 'data', 'valid_guesses.txt')
+    if os.path.exists(guesses_path):
+        with open(guesses_path) as f:
+            valid.update(w.strip().upper() for w in f if w.strip() and len(w.strip()) == 5)
+    return valid
+
 def _score_guess(guess, secret):
     guess, secret = guess.upper(), secret.upper()
     result = [{'letter': g, 'status': 'absent'} for g in guess]
@@ -70,7 +82,7 @@ def register_game_events():
             emit('error', {'msg': 'Not in this game'}); return
         if len(guess) != len(game.secret_word):
             emit('error', {'msg': f'Guess must be {len(game.secret_word)} letters'}); return
-        if guess not in _get_wordbank():
+        if guess not in _get_valid_guesses():
             emit('error', {'msg': 'Not a valid word'}); return
 
         is_p1 = (uid == game.player1_id)
