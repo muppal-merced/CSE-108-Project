@@ -1,21 +1,8 @@
 import json
-import os
-from functools import lru_cache
 from flask import session
 from flask_socketio import emit, join_room
 from app.extensions import socketio, db
 from app.models import Game, Lobby
-
-
-@lru_cache(maxsize=1)
-def _get_wordbank():
-    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    with open(os.path.join(base, 'data', 'answers.txt')) as f:
-        return {
-            w.strip().upper()
-            for w in f
-            if w.strip() and len(w.strip()) == 5
-        }
 
 def _score_guess(guess, secret):
     guess, secret = guess.upper(), secret.upper()
@@ -72,8 +59,6 @@ def register_game_events():
             emit('error', {'msg': 'Not in this game'}); return
         if len(guess) != len(game.secret_word):
             emit('error', {'msg': f'Guess must be {len(game.secret_word)} letters'}); return
-        if guess not in _get_wordbank():
-            emit('error', {'msg': 'Guess must be a valid word'}); return
 
         is_p1 = (uid == game.player1_id)
         guesses_attr = 'player1_guesses' if is_p1 else 'player2_guesses'
