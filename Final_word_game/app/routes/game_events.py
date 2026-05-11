@@ -80,6 +80,8 @@ def register_game_events():
         my_guesses = json.loads(getattr(game, guesses_attr) or '[]')
         if len(my_guesses) >= 6:
             emit('error', {'msg': 'No guesses remaining'}); return
+        if guess in {''.join(t['letter'] for t in row).upper() for row in my_guesses}:
+            emit('error', {'msg': 'You already guessed that word'}); return
 
         scored = _score_guess(guess, game.secret_word)
         my_guesses.append(scored)
