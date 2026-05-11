@@ -479,7 +479,6 @@ aspis
 aspro
 assai
 assam
-asses
 assez
 assot
 aster
@@ -914,7 +913,6 @@ birsy
 bises
 bisks
 bisom
-bitch
 biter
 bites
 bitos
@@ -1046,7 +1044,6 @@ bombs
 bonce
 bonds
 boned
-boner
 bones
 bongs
 bonie
@@ -1057,7 +1054,6 @@ bonza
 bonze
 booai
 booay
-boobs
 boody
 booed
 boofy
@@ -1562,7 +1558,6 @@ chimo
 chimp
 chine
 ching
-chink
 chino
 chins
 chips
@@ -1995,7 +1990,6 @@ cumec
 cundy
 cunei
 cunit
-cunts
 cupel
 cupid
 cuppa
@@ -2101,7 +2095,6 @@ dargs
 daric
 daris
 darks
-darky
 darns
 darre
 darts
@@ -2268,7 +2261,6 @@ diced
 dicer
 dices
 dicht
-dicks
 dicky
 dicot
 dicta
@@ -2289,7 +2281,6 @@ diked
 diker
 dikes
 dikey
-dildo
 dilli
 dills
 dimbo
@@ -2876,9 +2867,7 @@ faena
 faery
 faffs
 faffy
-faggy
 fagin
-fagot
 faiks
 fails
 faine
@@ -3266,7 +3255,6 @@ fryer
 fubar
 fubby
 fubsy
-fucks
 fucus
 fuddy
 fudgy
@@ -3650,8 +3638,6 @@ gooby
 goods
 goofs
 googs
-gooks
-gooky
 goold
 gools
 gooly
@@ -3832,9 +3818,6 @@ gynie
 gynny
 gynos
 gyoza
-gypos
-gyppo
-gyppy
 gyral
 gyred
 gyres
@@ -6080,8 +6063,6 @@ navew
 navvy
 nawab
 nazes
-nazir
-nazis
 nduja
 neafe
 neals
@@ -6716,7 +6697,6 @@ pened
 penes
 pengo
 penie
-penis
 penks
 penna
 penni
@@ -6747,7 +6727,6 @@ perts
 perve
 pervo
 pervs
-pervy
 pesos
 pests
 pesty
@@ -7006,9 +6985,6 @@ porgy
 porin
 porks
 porky
-porno
-porns
-porny
 porta
 ports
 porty
@@ -7133,7 +7109,6 @@ psora
 psych
 psyop
 pubco
-pubes
 pubis
 pucan
 pucer
@@ -7206,7 +7181,6 @@ pursy
 purty
 puses
 pusle
-pussy
 putid
 puton
 putti
@@ -7357,9 +7331,6 @@ ranis
 ranke
 ranks
 rants
-raped
-raper
-rapes
 raphe
 rappe
 rared
@@ -8136,8 +8107,6 @@ sewed
 sewel
 sewen
 sewin
-sexed
-sexer
 sexes
 sexto
 sexts
@@ -8192,8 +8161,6 @@ shirs
 shish
 shiso
 shist
-shite
-shits
 shiur
 shiva
 shive
@@ -8450,7 +8417,6 @@ slums
 slurb
 slurs
 sluse
-sluts
 slyer
 slype
 smaak
@@ -9356,9 +9322,7 @@ tiros
 tirrs
 titch
 titer
-titis
 titre
-titty
 titup
 tiyin
 tiyns
@@ -9633,7 +9597,6 @@ twaes
 twain
 twals
 twank
-twats
 tways
 tweel
 tween
@@ -10085,7 +10048,6 @@ waned
 wanes
 waney
 wangs
-wanks
 wanky
 wanle
 wanly
@@ -10223,7 +10185,6 @@ whomp
 whoof
 whoot
 whops
-whore
 whorl
 whort
 whoso
